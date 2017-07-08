@@ -7,7 +7,7 @@ HISTCONTROL=ignoreboth
 HISTFILE=/Users/mujha/.bash_history
 HISTFILESIZE=10000000
 HISTSIZE=10000000
-JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home
+JAVA_HOME=/Library/Java/Home
 KAFKA_HOME=/pkg/kafka/
 PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/pkg/hbase/bin:/pkg/hadoop/bin
 #PROMPT_COMMAND='history -a; history -c; history -r; echo -ne "\033]0;${PWD/#$HOME/~}@${HOSTNAME%%.*}"; echo -ne "\007"'
@@ -30,6 +30,9 @@ chef_prod_setup ()
     alias knife="proxychains4 -q knife";
     alias knifemux="proxychains4 -q ~/.chef/scripts/knifemux_prod"
     alias km="proxychains4 -q ~/.chef/scripts/knifemux_prod"
+    alias kmc="km \"$st\" ciuser"
+    alias kmr="km \"$st\" root"
+    alias kmm="km \"$st\" mujha"
     #alias knife="tsocks knife";
     #alias knifemux="tsocks ~/.chef/scripts/knifemux_prod"
     #TSOCKS_CONF_FILE=/Users/mujha/.chef/.tsocks.conf
@@ -40,6 +43,10 @@ chef_stage_setup ()
     ls -al ~/.chef/knife.rb;
     alias knife="knife";
     alias knifemux="~/.chef/scripts/knifemux_stage"
+    alias km="proxychains4 -q ~/.chef/scripts/knifemux_prod"
+    alias kmc="km \"$st\" ciuser"
+    alias kmr="km \"$st\" root"
+    alias kmm="km \"$st\" mujha"
 }
 restart_flink()
 {
@@ -53,16 +60,16 @@ flink_start ()
    # init
 
    #SETUP
-   mainClassName=com..ci.pipeline.MessageAuditor
-   jarFileName=/opt/data/code/ci/java/pipeline_streaming/target/pipeline_streaming.jar
-   configFileName=/code/ci/java/pipeline_streaming/src/main/resources/config/pipeline_message_auditor_runner_flink_config_local.yml
+   mainClassName=com.oracle.ci.pipeline.Auditor
+   jarFileName=/opt/data/code/ci/java/streaming_auditor/target/streaming_auditor.jar
+   configFileName=/code/ci/java/streaming_auditor/src/test/resources/config/batch/batch_auditor_flink_config_test.yml
    yarnOpts="yarn-cluster -d -p 4 --yarnname message_auditor --yarndetached --yarnjobManagerMemory 1024 --yarntaskManagerMemory 1024 --yarncontainer 2 --yarnslots 2"
 
    #RUN
    $FLINK_HOME/bin/flink run -m $yarnOpts -c $mainClassName -j $jarFileName --config $configFileName #FLINK
 
    #PRODUCE
-   #java -cp $jarFileName com..ci.kafka.util.CIKafkaProducer -s 30000
+   #java -cp $jarFileName com.oracle.ci.kafka.util.CIKafkaProducer -s 30000
 }
 flink_stop () 
 { 
@@ -133,9 +140,9 @@ maven_setup_stage ()
 }
 proxy_set () 
 { 
-    export http_proxy=http://adc-proxy..com:80;
-    export https_proxy=http://adc-proxy..com:80;
-    export no_proxy=chef.usdc2.cloud.com
+    export http_proxy=http://adc-proxy.oracle.com:80;
+    export https_proxy=http://adc-proxy.oracle.com:80;
+    export no_proxy=chef.usdc2.oraclecloud.com
 }
 proxy_unset () 
 { 
@@ -199,7 +206,7 @@ alias fle='perl -pi -e '\''s/\r//g'\'' '
 # git push origin --delete <branch_name>
 # git branch -d/D branch_name
 alias ga='git add'
-alias gaa='git add pom.xml src/*/*/com//ci/'
+alias gaa='git add pom.xml src/*/*/com/oracle/ci/ src/*/resources/'
 alias gb='git blame'
 alias gc='git checkout'
 alias gd='git diff'
